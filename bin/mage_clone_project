@@ -1,0 +1,24 @@
+#!/bin/bash
+
+set -eu
+
+bin/clone_project "$@"
+
+project_dir=osi_clone_integration
+
+cd $project_dir
+
+# update search config
+bin/mysql -e "insert into core_config_data (path,value) values('catalog/search/elasticsearch7_server_hostname','elasticsearch');"
+
+bin/m app:config:import -q
+bin/m setup:upgrade -q
+bin/m indexer:reindex -q
+
+bin/cache/refresh -q
+
+# TODO remove this in the future
+cp ~/dev/web/projects/osi/osi-shop/docker-compose.local.yml .
+
+bin/m config:show web/secure/base_url
+
