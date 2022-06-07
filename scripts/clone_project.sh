@@ -2,19 +2,29 @@
 
 set -eu
 
+verbose=1
 start_dir=~/dev/web/projects/clone
 
-# TODO make all of this variable
-project_name="osi"
-git_repo="git@code.monsoonconsulting.com:magento2/osi.git"
-branch="clone_project"
+project_name=${1:-""}
+git_repo=${2:-""}
+branch=${3:-"clone"}
+clone_project_name="$project_name"_clone_"$branch"
+clone_dir=$clone_project_name
+
+if [ -z "$project_name" ] || [ -z "$git_repo" ]; then
+  echo "missing required arguments"
+  usage
+  exit 1
+fi
+
+usage() {
+    echo "usage: `basename $0` project_name git_repo [branch]"
+}
 
 clone_the_repo() {
   git clone $git_repo .
   git checkout $branch
 }
-
-clone_dir="$project_name"_clone
 
 volume_names=("sql" "www")
 clone_volumes() {
@@ -78,45 +88,57 @@ update_url() {
   local container_name="$clone_dir"_php_1
   local tmp_file_name="tmp_env.php"
 
-  docker cp osi_clone_php_1:/var/www/html/app/etc/env.php $tmp_file_name
+  docker cp $container_name:/var/www/html/app/etc/env.php $tmp_file_name
   echo "<?php return " $(php -r "\$config = require_once '$tmp_file_name'; unset(\$config['system']); var_export(\$config);") ";" > $tmp_file_name
   docker cp ./$tmp_file_name $container_name:/var/www/html/app/etc/env.php
 
   bin/mysql -e "update core_config_data set value='$clone_url' where path like '%base_url'"
 }
 
-echo Cloning the project; echo
+main() {
+  echo Cloning the project; echo
 
-# we will need to update this in the future
-cd "$start_dir"
+  # we will need to update this in the future
+  cd "$start_dir"
 
-echo Cloning the volumes
-clone_volumes
+  echo Cloning the volumes
+  clone_volumes
 
-echo Creating the directory structure...
-create_clone_directory
+  echo Creating the directory structure...
+  create_clone_directory
 
-# clone the git repo here
-echo Cloning the repo...
-clone_the_repo
+  # clone the git repo here
+  echo Cloning the repo...
+  clone_the_repo
 
-echo Copying the bin directory
-copy_bin
+  echo Updating docker config
+  update_docker_config
 
-echo Updating docker config
-update_docker_config
+  echo Copying the bin directory
+  copy_bin
 
-echo; echo Lift Off!!!
-docker_start
+  echo; echo Lift Off!!!
+  docker_start
 
-echo; echo Updating the URL
-update_url
+  echo; echo Updating the URL
+  update_url
 
-echo
-echo Finished cloning the project
-echo The project is located here $clone_dir
-echo the projects URL is $clone_url
-echo Enjoy!
+  echo
+  echo Finished cloning the project
+  echo The project is located here $clone_dir
+  echo the projects URL is $clone_url
+  debug "Enjoy!"
+  # echo; echo !Sorry, but we are still missing the update of the hosts files
 
-# echo; echo !Sorry, but we are still missing the update of the hosts files
+  echo $clone_dir
+  exit 0
+}
+
+debug() {
+    if [ $verbose ]; then
+        echo $* >&2
+    fi
+}
+
+main
 
