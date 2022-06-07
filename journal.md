@@ -19,12 +19,13 @@ Yq tool turned out to be great. Very simple to use and very useful.
 
 ## Next steps
 * <b>high</b> parameterize the script
-* <b>mid</b> improve the current implementation: possibility to put volumes and ports into arrays for mapping
+~~* <b>mid</b> improve the current implementation: possibility to put volumes and ports into arrays for mapping~~
 * <b>low</b> hosts file needs to be updated
 * <b>high</b> adding support for branches
 * <b>low</b> use a designated folder to house the clones, low priority for now
-* <b>high</b> update env.php
-* <b>high</b> something something darkside
+~~* <b>high</b> update env.php~~
+* <b>use a subdomain based on the branch name for the base URL</b>
+* <b>move the cloned projects to a specific directory</b>
 
 ## Feature
 
