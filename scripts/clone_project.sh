@@ -23,6 +23,7 @@ usage() {
 
 clone_the_repo() {
   git clone $git_repo .
+  git branch $branch || 0
   git checkout $branch
 }
 
