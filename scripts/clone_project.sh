@@ -9,7 +9,7 @@ project_name=${1:-""}
 git_repo=${2:-""}
 branch=${3:-"clone"}
 clone_project_name="$project_name"_clone_"$branch"
-clone_dir=$clone_project_name
+clone_dir="projects/$clone_project_name"
 
 if [ -z "$project_name" ] || [ -z "$git_repo" ]; then
   echo "missing required arguments"
@@ -18,7 +18,27 @@ if [ -z "$project_name" ] || [ -z "$git_repo" ]; then
 fi
 
 usage() {
-    echo "usage: `basename $0` project_name git_repo [branch]"
+    echo "usage: `basename $0` project-name git-repo [branch]"
+}
+
+volume_names=("sql" "www")
+clone_volumes() {
+  for vol in "${volume_names[@]}"
+  do
+    original_volume="$project_name"_"$vol"
+    clone_volume_name="$clone_project_name"_"$vol"
+    bin/volume_clone $original_volume $clone_volume_name >/dev/null
+  done
+}
+
+create_clone_project_dir() {
+  if [[ -d $clone_dir ]] 
+  then
+    rm -rf $clone_dir
+  fi;
+
+  mkdir $clone_dir -p
+  cd $clone_dir
 }
 
 clone_the_repo() {
@@ -27,26 +47,7 @@ clone_the_repo() {
   git checkout $branch
 }
 
-volume_names=("sql" "www")
-clone_volumes() {
-  for vol in "${volume_names[@]}"
-  do
-    original_volume="$project_name"_"$vol"
-    clone_volume_name="$clone_dir"_"$vol"
-    bin/volume_clone $original_volume $clone_volume_name >/dev/null
-  done
-}
-
-create_clone_directory() {
-  if [[ -d "$clone_dir" ]] 
-  then
-    rm -rf $clone_dir
-  fi;
-
-  mkdir $clone_dir
-  cd "$clone_dir"
-}
-
+# TODO update this
 bin_dir="$HOME/dev/web/projects/osi/osi-shop/bin"
 copy_bin() {
   cp -r $bin_dir .
@@ -58,18 +59,19 @@ generate_random_port() {
 
 nginx_port=$(generate_random_port)
 db_port=$(generate_random_port)
-
 update_ports_config() {
     nginx_port_mapping=$nginx_port:443
     db_port_mapping=$db_port:3306
-    echo Updating the docker compose config file...
+
+    # debug Updating the docker compose config file...
     yq 'del(.services | .[] | .ports)' .docker/docker-compose.yml | sponge .docker/docker-compose.yml # remove all port mappings
     yq ".services.nginx.ports=[\"$nginx_port_mapping\"] | .services.database.ports=[\"$db_port_mapping\"]" .docker/docker-compose.yml | sponge .docker/docker-compose.yml
 }
 
 update_env_config() {
-  echo Updating the .env file...
-  (echo "COMPOSE_PROJECT_NAME=$clone_dir" > .docker/.env)
+  debug Updating the .env file...
+
+  echo "COMPOSE_PROJECT_NAME=$clone_project_name" > .docker/.env
 }
 
 update_docker_config() {
@@ -84,9 +86,9 @@ docker_start() {
 clone_url=https://dev-"$project_name":$nginx_port/
 update_url() {
   # Updating the URL in the database, watch it here, this can be overriden in env.php
-  echo Updating the projects main URL
+  debug Updating the projects main URL
 
-  local container_name="$clone_dir"_php_1
+  local container_name="$clone_project_name"_php_1
   local tmp_file_name="tmp_env.php"
 
   docker cp $container_name:/var/www/html/app/etc/env.php $tmp_file_name
@@ -97,41 +99,39 @@ update_url() {
 }
 
 main() {
-  echo Cloning the project; echo
+  debug Cloning the project; debug
 
   # we will need to update this in the future
   cd "$start_dir"
 
-  echo Cloning the volumes
+  debug Cloning the volumes
   clone_volumes
 
-  echo Creating the directory structure...
-  create_clone_directory
+  debug Creating the directory structure...
+  create_clone_project_dir
 
   # clone the git repo here
-  echo Cloning the repo...
+  debug Cloning the repo...
   clone_the_repo
 
-  echo Updating docker config
+  debug Updating docker config
   update_docker_config
 
-  echo Copying the bin directory
+  debug "Copying the bin directory"
   copy_bin
 
-  echo; echo Lift Off!!!
+  debug Lift Off!!!
   docker_start
 
-  echo; echo Updating the URL
+  debug Updating the URL
   update_url
 
-  echo
-  echo Finished cloning the project
-  echo The project is located here $clone_dir
-  echo the projects URL is $clone_url
+  debug Finished cloning the project
+  debug The project is located here $clone_project_name
+  debug the projects URL is $clone_url
   debug "Enjoy!"
-  # echo; echo !Sorry, but we are still missing the update of the hosts files
 
-  echo $clone_dir
+  echo $clone_project_name
   exit 0
 }
 
