@@ -21,11 +21,11 @@ cd $clone_dir
 bin/mysql -e "delete from core_config_data where path ='catalog/search/elasticsearch7_server_hostname'"
 bin/mysql -e "insert into core_config_data (path,value) values('catalog/search/elasticsearch7_server_hostname','elasticsearch');"
 
+bin/m app:config:import -q
 bin/m config:set msp_securitysuite_adminrestriction/general/enabled 0
 bin/m config:set twofactorauth/general/enable 0
 
-bin/m app:config:import -q
-bin/m setup:upgrade -q
+# bin/m setup:upgrade -q
 bin/m indexer:reindex -q
 bin/m cache:flush -q
 bin/m -q
