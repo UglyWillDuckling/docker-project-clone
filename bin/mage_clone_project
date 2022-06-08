@@ -2,11 +2,20 @@
 
 set -eu
 
+project_name=${1:-""}
+branch=${3:-"clone"}
+
+if [ -z "$project_name" ]; then
+  echo "missing required arguments"
+  exit 1
+fi
+
 bin/clone_project "$@"
 
-project_dir=osi_clone_integration
+clone_project_name="$project_name"_clone_"$branch"
+clone_dir="projects/$clone_project_name"
 
-cd $project_dir
+cd $clone_dir
 
 # update search config
 bin/mysql -e "delete from core_config_data where path ='catalog/search/elasticsearch7_server_hostname'"
