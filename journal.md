@@ -18,22 +18,30 @@ to polute the current script with any project or framework specific requirements
 Yq tool turned out to be great. Very simple to use and very useful.
 
 ## Next steps
-* <b>high</b> parameterize the script
-~~* <b>mid</b> improve the current implementation: possibility to put volumes and ports into arrays for mapping~~
-* <b>low</b> hosts file needs to be updated
-* <b>high</b> adding support for branches
-* <b>low</b> use a designated folder to house the clones, low priority for now
-~~* <b>high</b> update env.php~~
-* <b>use a subdomain based on the branch name for the base URL</b>
-* <b>move the cloned projects to a specific directory</b>
 
-## Feature
+- [ ] improve the current implementation: possibility to put volumes and ports into arrays for mapping
+- [ ] hosts file needs to be updated
+- [ ] use a subdomain based on the branch name for the base URL
+- [x] update env.php
+- [x] move the cloned projects to a specific directory
+- [x] parameterize the script
+
+## Features
 
 ### Support for branches
 
 This would give the possibility to have more than one cloned project. The naming would be based of of the branch.
 
-## Problem
+**Implemented**
+
+### Volumes and ports mapping
+
+it would be possible to provide an additional list of port mappings and volume mappings.
+
+The port mappings would include service names and host/container port mapping.
+The volume list would only require the original volume name.
+
+## Problems
 
 ### URL issue
 
