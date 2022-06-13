@@ -10,29 +10,37 @@ if [ -z "$project_name" ]; then
   exit 1
 fi
 
-bin/clone_project "$@"
+main() {
+  bin/clone_project "$@"
 
-clone_project_name="$project_name"_clone_"$branch"
-clone_dir="projects/$clone_project_name"
+  clone_project_name="$project_name"_clone_"$branch"
+  clone_dir="projects/$clone_project_name"
 
-cd $clone_dir
+  cd $clone_dir
 
-# update search config
-bin/mysql -e "delete from core_config_data where path ='catalog/search/elasticsearch7_server_hostname'"
-bin/mysql -e "insert into core_config_data (path,value) values('catalog/search/elasticsearch7_server_hostname','elasticsearch');"
+  # update search config
+  bin/mysql -e "delete from core_config_data where path ='catalog/search/elasticsearch7_server_hostname'"
+  bin/mysql -e "insert into core_config_data (path,value) values('catalog/search/elasticsearch7_server_hostname','elasticsearch');"
 
-bin/m app:config:import -q
-bin/m config:set msp_securitysuite_adminrestriction/general/enabled 0
-bin/m config:set twofactorauth/general/enable 0
-bin/m config:set admin/captcha/enable 0
+  mage app:config:import
+  mage config:set msp_securitysuite_adminrestriction/general/enabled 0
+  mage config:set twofactorauth/general/enable 0
+  mage config:set admin/captcha/enable 0
 
-# bin/m setup:upgrade -q
-bin/m indexer:reindex -q
-bin/m cache:flush -q
-bin/m -q
+  # mage setup:upgrade
+  mage indexer:reindex
+  mage cache:flush
+  mage
 
-# TODO remove this in the future
-cp ~/dev/web/projects/osi/osi-shop/docker-compose.local.yml .
+  # TODO remove this in the future
+  cp ~/dev/web/projects/osi/osi-shop/docker-compose.local.yml .
 
-bin/m config:show web/secure/base_url
+  mage config:show web/secure/base_url
+}
+
+mage() {
+  bin/m "$@" -q
+}
+
+main
 
