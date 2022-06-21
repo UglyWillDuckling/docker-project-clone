@@ -20,7 +20,9 @@ main() {
 
   # update search config
   bin/mysql -e "delete from core_config_data where path ='catalog/search/elasticsearch7_server_hostname'"
-  bin/mysql -e "insert into core_config_data (path,value) values('catalog/search/elasticsearch7_server_hostname','elasticsearch');"
+  bin/mysql -e "insert into core_config_data (path,value) values('catalog/search/elasticsearch7_server_hostname','elasticsearch')"
+  bin/mysql -e "delete from core_config_data where path ='catalog/search/engine'"
+  bin/mysql -e "insert into core_config_data (path,value) values('catalog/search/engine','elasticsearch7')"
 
   mage app:config:import
   mage config:set msp_securitysuite_adminrestriction/general/enabled 0
