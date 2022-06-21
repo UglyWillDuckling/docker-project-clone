@@ -24,6 +24,8 @@ main() {
   bin/mysql -e "delete from core_config_data where path ='catalog/search/engine'"
   bin/mysql -e "insert into core_config_data (path,value) values('catalog/search/engine','elasticsearch7')"
 
+  bin/cli chmod u+x bin/magento
+
   mage app:config:import
   mage config:set msp_securitysuite_adminrestriction/general/enabled 0
   mage config:set twofactorauth/general/enable 0
