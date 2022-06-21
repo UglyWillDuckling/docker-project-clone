@@ -28,6 +28,7 @@ main() {
   mage config:set msp_securitysuite_adminrestriction/general/enabled 0
   mage config:set twofactorauth/general/enable 0
   mage config:set admin/captcha/enable 0
+  mage config:set msp_securitysuite_adminrestriction/general/enabled 0
 
   # mage setup:upgrade
   mage indexer:reindex
