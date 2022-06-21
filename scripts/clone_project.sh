@@ -11,15 +11,17 @@ branch=${3:-"clone"}
 clone_project_name="$project_name"_clone_"$branch"
 clone_dir="projects/$clone_project_name"
 
+usage() {
+    echo "usage: `basename $0` project-name git-repo [branch]"
+}
+
+echo $project_name and $git_repo
+
 if [ -z "$project_name" ] || [ -z "$git_repo" ]; then
   echo "missing required arguments"
   usage
   exit 1
 fi
-
-usage() {
-    echo "usage: `basename $0` project-name git-repo [branch]"
-}
 
 volume_names=("sql" "www")
 clone_volumes() {
