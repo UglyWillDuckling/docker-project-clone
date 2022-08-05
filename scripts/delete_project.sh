@@ -24,7 +24,7 @@ remove_volumes() {
   for vol in "${volume_names[@]}"
   do
     clone_volume_name="$clone_project_name"_"$vol"
-    docker volume rm $clone_volume_name
+    docker volume rm $clone_volume_name || true
   done
 }
 
@@ -34,8 +34,8 @@ remove_containers() {
    for container in "${containers[@]}"
    do
        local container_name="$clone_project_name"-"$container"-1
-       docker stop $container_name
-       docker rm $container_name
+       docker stop $container_name || true
+       docker rm $container_name || true
    done
 }
 
@@ -47,6 +47,6 @@ echo removing containers
 remove_containers
 echo removing volumes
 remove_volumes
-echo removing directory
+echo removing directory "$clone_dir"
 remove_project_dir
 
