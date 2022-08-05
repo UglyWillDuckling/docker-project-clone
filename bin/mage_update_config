@@ -1,0 +1,30 @@
+#!/bin/bash
+
+set -eu
+
+main() {
+  # update search config
+  bin/mysql -e "delete from core_config_data where path ='catalog/search/elasticsearch7_server_hostname'"
+  bin/mysql -e "insert into core_config_data (path,value) values('catalog/search/elasticsearch7_server_hostname','elasticsearch')"
+  bin/mysql -e "delete from core_config_data where path ='catalog/search/engine'"
+  bin/mysql -e "insert into core_config_data (path,value) values('catalog/search/engine','elasticsearch7')"
+
+  mage config:set msp_securitysuite_adminrestriction/general/enabled 0
+  mage config:set twofactorauth/general/enable 0
+  mage config:set admin/captcha/enable 0
+
+  mage config:set recaptcha_backend/type_for/user_login ""
+  mage config:set recaptcha_backend/type_for/user_forgot_password ""
+  mage config:set recaptcha_frontend/type_for/customer_login ""
+  mage config:set recaptcha_frontend/type_for/customer_forgot_password ""
+  mage config:set recaptcha_frontend/type_for/customer_create ""
+  mage config:set recaptcha_frontend/type_for/product_review ""
+  mage config:set recaptcha_frontend/type_for/contact ""
+}
+
+mage() {
+  bin/m "$@" -q
+}
+
+main "$@"
+

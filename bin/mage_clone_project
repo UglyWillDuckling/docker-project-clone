@@ -18,27 +18,10 @@ main() {
 
   cd $clone_dir
 
-  # update search config
-  bin/mysql -e "delete from core_config_data where path ='catalog/search/elasticsearch7_server_hostname'"
-  bin/mysql -e "insert into core_config_data (path,value) values('catalog/search/elasticsearch7_server_hostname','elasticsearch')"
-  bin/mysql -e "delete from core_config_data where path ='catalog/search/engine'"
-  bin/mysql -e "insert into core_config_data (path,value) values('catalog/search/engine','elasticsearch7')"
-
+  # TODO remove this line in the future
   bin/cli chmod u+x bin/magento
 
-  mage app:config:import
-  mage config:set msp_securitysuite_adminrestriction/general/enabled 0
-  mage config:set twofactorauth/general/enable 0
-  mage config:set admin/captcha/enable 0
-  mage config:set msp_securitysuite_adminrestriction/general/enabled 0
-
-  # mage setup:upgrade
-  mage indexer:reindex
-  mage cache:flush
-  mage
-
-  # TODO remove this in the future
-  cp ~/dev/web/projects/osi/osi-shop/docker-compose.local.yml .
+  ../../bin/mage_update_config
 
   mage config:show web/secure/base_url
 }
