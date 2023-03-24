@@ -23,6 +23,7 @@ main() {
 
   ../../bin/mage_update_config
 
+  mage app:config:import
   mage config:show web/secure/base_url
 }
 
